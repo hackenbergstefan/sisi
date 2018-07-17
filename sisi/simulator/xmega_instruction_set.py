@@ -48,7 +48,8 @@ def adiw(sim: Simulator, rd1: Register, rd: Register, k: int):
     """
     ADIW Rd, K
     Add Immediate to Word
-    Rd + 1:Rd ← Rd + 1:Rd + K Z,C,N,V,S
+    Rd + 1:Rd ← Rd + 1:Rd + K
+    Z,C,N,V,S
     """
     rd.value = res = rd.value + k
     rd1.value = res = rd1.value + (res >> rd.number_of_bits)
