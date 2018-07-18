@@ -8,6 +8,13 @@ from .xmega import PointerRegister
 """The AVR instruction set."""
 
 
+def nop(sim: Simulator):
+    """
+    NOP
+    """
+    sim.leakage += [4]
+
+
 def eor(sim: Simulator, rd: Register, rr: Register):
     """
     EOR Rd, Rr Exclusive OR Rd ← Rd ⊕ Rr
@@ -34,7 +41,7 @@ def add(sim: Simulator, rd: Register, rr: Register):
     Rd ← Rd + Rr
     Z,C,N,V,S,H
     """
-    rd.value = res = rd.value + rr.value
+    rd.value = rd.value + rr.value
     sim.leakage += [hamming_weight(rd.value)]
 
 
@@ -46,6 +53,7 @@ def ld(sim: Simulator, rd: Register, x: PointerRegister):
     None
     """
     rd.value = sim.memory[x.value]
+    sim.leakage += [hamming_weight(rd.value)]
 
 
 def st(sim: Simulator, x: PointerRegister, rr: Register):
@@ -56,3 +64,15 @@ def st(sim: Simulator, x: PointerRegister, rr: Register):
     None
     """
     sim.memory[x.value] = rr.value
+    sim.leakage += [hamming_weight(rr.value)]
+
+
+def ldi(sim: Simulator, rd: Register, k: int):
+    """
+    LDI Rd, K
+    Load Immediate
+    Rd ← K
+    None
+    """
+    rd.value = k
+    sim.leakage += [hamming_weight(rd.value)]
