@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import random
 from . import Register, Simulator, hamming_weight
 from .xmega import PointerRegister
 
@@ -12,7 +13,7 @@ def nop(sim: Simulator):
     """
     NOP
     """
-    sim.leakage += [4]
+    # sim.leakage += [0]
 
 
 def eor(sim: Simulator, rd: Register, rr: Register):
