@@ -2,10 +2,17 @@
 # -*- coding: utf-8 -*-
 
 
+HAMMING_WEIGHT = [bin(i).count('1') for i in range(256)]
+
+
+def hamming_weight(x):
+    return HAMMING_WEIGHT[x]
+
+
 class Simulator(object):
 
     def __init__(self):
-        pass
+        self.leakage = []
 
     def execute(self, ins):
         if isinstance(ins, list):

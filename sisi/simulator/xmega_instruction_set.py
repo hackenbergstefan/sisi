@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import Register, Simulator
+from . import Register, Simulator, hamming_weight
+from .xmega import PointerRegister
 
 
 """The AVR instruction set."""
-
-
-def update_status_regs(sim, res, flags='ZCNVSH'):
-    if 'Z' in flags:
-        sim.regs['Z'] = res == 0
-    if 'C' in flags:
-        sim.regs['C'] = res > 0xff
 
 
 def eor(sim: Simulator, rd: Register, rr: Register):
@@ -19,7 +13,18 @@ def eor(sim: Simulator, rd: Register, rr: Register):
     EOR Rd, Rr Exclusive OR Rd ← Rd ⊕ Rr
     """
     rd.value = rd.value ^ rr.value
-    update_status_regs(sim, rd.value)
+    sim.leakage += [hamming_weight(rd.value)]
+
+
+def anl(sim: Simulator, rd: Register, rr: Register):
+    """
+    AND Rd, Rr
+    Logical AND
+    Rd ← Rd • Rr
+    Z,N,V,S
+    """
+    rd.value = rd.value & rr.value
+    sim.leakage += [hamming_weight(rd.value)]
 
 
 def add(sim: Simulator, rd: Register, rr: Register):
@@ -30,27 +35,24 @@ def add(sim: Simulator, rd: Register, rr: Register):
     Z,C,N,V,S,H
     """
     rd.value = res = rd.value + rr.value
-    update_status_regs(sim, res)
+    sim.leakage += [hamming_weight(rd.value)]
 
 
-def adc(sim: Simulator, rd: Register, rr: Register):
+def ld(sim: Simulator, rd: Register, x: PointerRegister):
     """
-    ADC Rd, Rr
-    Add with Carry
-    Rd ← Rd + Rr + C
-    Z,C,N,V,S,H
+    LD Rd, X
+    Load Indirect
+    Rd ← (X)
+    None
     """
-    rd.value = res = rd.value + rr.value + sim.regs['C']
-    update_status_regs(sim, res)
+    rd.value = sim.memory[x.value]
 
 
-def adiw(sim: Simulator, rd1: Register, rd: Register, k: int):
+def st(sim: Simulator, x: PointerRegister, rr: Register):
     """
-    ADIW Rd, K
-    Add Immediate to Word
-    Rd + 1:Rd ← Rd + 1:Rd + K
-    Z,C,N,V,S
+    ST X, Rr
+    Store Indirect
+    (X) ← Rr
+    None
     """
-    rd.value = res = rd.value + k
-    rd1.value = res = rd1.value + (res >> rd.number_of_bits)
-    update_status_regs(sim, res >> rd.number_of_bits)
+    sim.memory[x.value] = rr.value
