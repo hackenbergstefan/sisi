@@ -13,7 +13,7 @@ def nop(sim: Simulator):
     """
     NOP
     """
-    # sim.leakage += [0]
+    sim.leakage += [0]
 
 
 def eor(sim: Simulator, rd: Register, rr: Register):
@@ -77,3 +77,22 @@ def ldi(sim: Simulator, rd: Register, k: int):
     """
     rd.value = k
     sim.leakage += [hamming_weight(rd.value)]
+
+def mov(sim: Simulator, rd: Register, rr: Register):
+    """
+    MOV Rd, Rr
+    Copy Register
+    Rd ← Rr
+    """
+    rd.value = rr.value
+    sim.leakage += [hamming_weight(rd.value)]
+
+def add(sim: Simulator, rd: Register, rr: Register):
+    """
+    ADD Rd, Rr
+    Add without Carry
+    Rd ← Rd + Rr
+    Z,C,N,V,S,H
+    """
+    rd.value += rr.value
+    # sim.leakage += [hamming_weight(rd.value)]
