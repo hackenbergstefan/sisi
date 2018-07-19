@@ -2,11 +2,22 @@
 # -*- coding: utf-8 -*-
 
 
+import random
+
+
 HAMMING_WEIGHT = [bin(i).count('1') for i in range(256)]
 
 
 def hamming_weight(x):
     return HAMMING_WEIGHT[x]
+
+
+def normalized_hamming_weight(x):
+    return (HAMMING_WEIGHT[x] - 4.0) / 4.0
+
+
+def normalized_noisy_hamming_weight(x, noise_strength):
+    return normalized_hamming_weight(x) + (random.random() - 0.5) * noise_strength
 
 
 class Simulator(object):

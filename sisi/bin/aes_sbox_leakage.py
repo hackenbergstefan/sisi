@@ -1,11 +1,19 @@
+#/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import random
 import numpy as np
-#import matplotlib
-import os
+# import matplotlib.pyplot as plot
+from sisi.cwfileformat import CWTraceFile
 
 from sisi.simulator import Instruction
 from sisi.simulator.xmega import XMegaSimulator
 from sisi.simulator.xmega_instruction_set import eor, ld, st, ldi, nop, mov, add
+
+
+"""
+Example demonstrating leakage of AES SBOX lookup.
+"""
 
 
 key = 0x11
@@ -40,36 +48,45 @@ def trace(pt):
     sim.regs['X'].value = 0x0010
     sim.regs['Z'].value = 0x1000
     sim.execute([
+        Instruction(nop),
+        Instruction(nop),
+        Instruction(nop),
+        Instruction(nop),
         Instruction(ld, sim.regs['r28'], sim.regs['Z']),
         Instruction(ldi, sim.regs['r24'], key),
         Instruction(eor, sim.regs['r28'], sim.regs['r24']),
-        # Instruction(mov, sim.regs['r28'], sim.regs['r26']),
-        # Instruction(mov, sim.regs['r29'], sim.regs['r27']),
         Instruction(add, sim.regs['Y'], sim.regs['X']),
         Instruction(ld, sim.regs['r25'], sim.regs['Y']),
-        Instruction(mov, sim.regs['r30'], sim.regs['r30']),
-        Instruction(mov, sim.regs['r30'], sim.regs['r30']),
-        Instruction(nop),
         Instruction(st, sim.regs['Z'], sim.regs['r25']),
+        Instruction(nop),
+        Instruction(nop),
+        Instruction(nop),
+        Instruction(nop),
     ])
-    return sim.leakage + (np.random.random_sample(len(sim.leakage)) - 0.5) * 0.9
+    return sim.leakage
 
 
 def main():
     samples = 50
-    textins = np.random.random_integers(0, 255, samples)
+    textin = np.random.random_integers(0, 255, samples)
     traces = []
-    for pt in textins:
+    for pt in textin:
         traces += [trace(pt)]
     traces = np.asarray(traces)
 
-    path = r'C:/Users/hackenbs/chipwhisperer/projects/base-01_data/traces'
-    np.save(os.path.join(path, r'aes_sbox_leakage_textin'), textins.reshape((samples, 1)))
-    np.save(os.path.join(path, r'aes_sbox_leakage_traces'), traces)
-    np.save(os.path.join(path, r'aes_sbox_leakage_textout'), textins.reshape((samples, 1)))
-    np.save(os.path.join(path, r'aes_sbox_leakage_knownkey'), np.array([key]))
-    np.save(os.path.join(path, r'aes_sbox_leakage_keylist'), np.array([[key]]*samples))
+    # Uncomment to show plot
+    # for t in traces:
+    #     plot.plot(t, linewidth=0.5)
+    # plot.show()
 
+    CWTraceFile(
+        r'C:/Users/hackenbs/chipwhisperer/projects/base-01_data/traces/aes_sbox_leakage2',
+        textin=textin.reshape((samples, 1)),
+        textout=textin.reshape((samples, 1)),
+        knownkey=np.array([key]),
+        keylist=np.array([[key]]*samples),
+        traces=traces,
+    ).save()
 
 
 if __name__ == '__main__':

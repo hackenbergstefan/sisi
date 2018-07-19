@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import random
-from . import Register, Simulator, hamming_weight
+from . import Register, Simulator, hamming_weight, normalized_noisy_hamming_weight
 from .xmega import PointerRegister
 
 
@@ -13,7 +12,7 @@ def nop(sim: Simulator):
     """
     NOP
     """
-    sim.leakage += [0]
+    sim.leakage += [normalized_noisy_hamming_weight(0x0f, 0.001)]
 
 
 def eor(sim: Simulator, rd: Register, rr: Register):
@@ -21,7 +20,7 @@ def eor(sim: Simulator, rd: Register, rr: Register):
     EOR Rd, Rr Exclusive OR Rd ← Rd ⊕ Rr
     """
     rd.value = rd.value ^ rr.value
-    sim.leakage += [hamming_weight(rd.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
 def anl(sim: Simulator, rd: Register, rr: Register):
@@ -32,7 +31,7 @@ def anl(sim: Simulator, rd: Register, rr: Register):
     Z,N,V,S
     """
     rd.value = rd.value & rr.value
-    sim.leakage += [hamming_weight(rd.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
 def add(sim: Simulator, rd: Register, rr: Register):
@@ -43,7 +42,7 @@ def add(sim: Simulator, rd: Register, rr: Register):
     Z,C,N,V,S,H
     """
     rd.value = rd.value + rr.value
-    sim.leakage += [hamming_weight(rd.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
 def ld(sim: Simulator, rd: Register, x: PointerRegister):
@@ -54,7 +53,7 @@ def ld(sim: Simulator, rd: Register, x: PointerRegister):
     None
     """
     rd.value = sim.memory[x.value]
-    sim.leakage += [hamming_weight(rd.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
 
 def st(sim: Simulator, x: PointerRegister, rr: Register):
@@ -65,7 +64,7 @@ def st(sim: Simulator, x: PointerRegister, rr: Register):
     None
     """
     sim.memory[x.value] = rr.value
-    sim.leakage += [hamming_weight(rr.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rr.value, 0.01)]
 
 
 def ldi(sim: Simulator, rd: Register, k: int):
@@ -76,7 +75,7 @@ def ldi(sim: Simulator, rd: Register, k: int):
     None
     """
     rd.value = k
-    sim.leakage += [hamming_weight(rd.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
 def mov(sim: Simulator, rd: Register, rr: Register):
     """
@@ -85,7 +84,7 @@ def mov(sim: Simulator, rd: Register, rr: Register):
     Rd ← Rr
     """
     rd.value = rr.value
-    sim.leakage += [hamming_weight(rd.value)]
+    sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 def add(sim: Simulator, rd: Register, rr: Register):
     """
