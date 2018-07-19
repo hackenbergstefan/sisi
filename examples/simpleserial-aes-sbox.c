@@ -53,7 +53,7 @@ void do_stuff(uint8_t *pt)
         ::
         );
 
-    pt[0] ^= key;
+    pt[0] = sbox[pt[0] ^ key];
 
     asm volatile(
         "nop"       "\n\t"

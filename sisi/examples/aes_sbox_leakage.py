@@ -13,6 +13,7 @@ from sisi.simulator.xmega_instruction_set import eor, ld, st, ldi, nop, mov, add
 
 """
 Example demonstrating leakage of AES SBOX lookup.
+Corresponding C-code is located at ../../examples/simpleserial-aes-sbox.c
 """
 
 
