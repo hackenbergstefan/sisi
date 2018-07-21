@@ -75,12 +75,21 @@ class Register8(Register):
 class Instruction(object):
 
     def __init__(self, operation, *operands):
-        # self.text = text
         self.operation = operation
         self.operands = operands
 
     def execute(self, sim):
         self.operation(sim, *self.operands)
+
+    def __eq__(self, other):
+        if not isinstance(other, Instruction):
+            return False
+        if self.operation == other.operation and self.operands == other.operands:
+            return True
+        return False
+
+    def __repr__(self):
+        return '<%s %s>' % (self.operation.__name__, ', '.join(map(str, self.operands)))
 
 
 class Label(object):
@@ -88,6 +97,15 @@ class Label(object):
 
     def __init__(self, name):
         self.name = name
+
+    def __eq__(self, other):
+        if not isinstance(other, Label):
+            return False
+        if self.name == other.name:
+            return True
+
+    def __repr__(self):
+        return '<Label "%s">' % self.name
 
 
 class ProgramEndException(Exception):

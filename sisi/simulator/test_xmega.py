@@ -92,15 +92,49 @@ class ProgramTestCase(unittest.TestCase):
         self.assertEqual(sim.regs['r0'].value, 0)
 
 
-# class ProgramParserTestCase(unittest.TestCase):
-#     """Test ProgramParser."""
+class ProgramParserTestCase(unittest.TestCase):
+    """Test ProgramParser."""
 
-#     def test_eor(self):
-#         prog = XmegaParser("""
-#             eor r0, r1
-#         """).parse()
+    def test_eor(self):
+        prog = XmegaParser("""
+            eor r0, r1
+        """).parse()
 
-#         self.assertEqual(
-#             prog,
-#             [Instruction(eor, 'r0', 'r1')]
-#         )
+        self.assertEqual(
+            prog,
+            [Instruction(eor, 'r0', 'r1')]
+        )
+
+    def test_nop(self):
+        prog = XmegaParser("""
+            nop
+            nop
+        """).parse()
+
+        self.assertEqual(
+            prog,
+            [
+                Instruction(nop),
+                Instruction(nop),
+            ]
+        )
+
+    def test_jmp(self):
+        prog = XmegaParser("""
+            nop
+            jmp foobar
+            ldi r0, 5
+            foobar:
+            nop
+        """).parse()
+
+        self.assertEqual(
+            prog,
+            [
+                Instruction(nop),
+                Instruction(jmp, 'foobar'),
+                Instruction(ldi, 'r0', 5),
+                Label('foobar'),
+                Instruction(nop),
+            ]
+        )

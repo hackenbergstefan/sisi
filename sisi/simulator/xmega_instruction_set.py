@@ -7,7 +7,28 @@ from .xmega import PointerRegister
 
 """The AVR instruction set."""
 
+INSTRUCTIONS = {}
 
+
+def xmega_instruction(*args):
+    name = args[0]
+
+    def _xmega_instruction(fun):
+        INSTRUCTIONS[name] = fun
+        return fun
+
+    if len(args) == 1 and callable(args[0]):
+        name = args[0].__name__
+        return _xmega_instruction(args[0])
+    else:
+        return _xmega_instruction
+
+
+def instruction_by_name(name):
+    return INSTRUCTIONS[name]
+
+
+@xmega_instruction
 def nop(sim: Simulator):
     """
     NOP
@@ -15,6 +36,7 @@ def nop(sim: Simulator):
     sim.leakage += [normalized_noisy_hamming_weight(0x0f, 0.001)]
 
 
+@xmega_instruction
 def eor(sim: Simulator, rd: Register, rr: Register):
     """
     EOR Rd, Rr Exclusive OR Rd ← Rd ⊕ Rr
@@ -25,6 +47,7 @@ def eor(sim: Simulator, rd: Register, rr: Register):
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
+@xmega_instruction('and')
 def anl(sim: Simulator, rd: Register, rr: Register):
     """
     AND Rd, Rr
@@ -38,9 +61,7 @@ def anl(sim: Simulator, rd: Register, rr: Register):
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
-anl.__name__ = 'and'
-
-
+@xmega_instruction
 def add(sim: Simulator, rd: Register, rr: Register):
     """
     ADD Rd, Rr
@@ -54,6 +75,7 @@ def add(sim: Simulator, rd: Register, rr: Register):
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
+@xmega_instruction
 def ld(sim: Simulator, rd: Register, x: PointerRegister):
     """
     LD Rd, X
@@ -67,6 +89,7 @@ def ld(sim: Simulator, rd: Register, x: PointerRegister):
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
 
+@xmega_instruction
 def st(sim: Simulator, x: PointerRegister, rr: Register):
     """
     ST X, Rr
@@ -80,6 +103,7 @@ def st(sim: Simulator, x: PointerRegister, rr: Register):
     sim.leakage += [normalized_noisy_hamming_weight(rr.value, 0.01)]
 
 
+@xmega_instruction
 def ldi(sim: Simulator, rd: Register, k: int):
     """
     LDI Rd, K
@@ -87,11 +111,14 @@ def ldi(sim: Simulator, rd: Register, k: int):
     Rd ← K
     None
     """
+    if isinstance(k, str):
+        k = int(k)
     rd = sim.regs[rd]
     rd.value = k
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
 
+@xmega_instruction
 def mov(sim: Simulator, rd: Register, rr: Register):
     """
     MOV Rd, Rr
@@ -104,6 +131,7 @@ def mov(sim: Simulator, rd: Register, rr: Register):
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
 
+@xmega_instruction
 def movw(sim: Simulator, rd: Register, rr: Register):
     """
     MOVW Rd, Rr
@@ -124,6 +152,7 @@ def movw(sim: Simulator, rd: Register, rr: Register):
     ]
 
 
+@xmega_instruction
 def jmp(sim: Simulator, label: Label):
     """
     JMP k
