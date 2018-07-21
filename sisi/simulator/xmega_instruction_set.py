@@ -19,6 +19,8 @@ def eor(sim: Simulator, rd: Register, rr: Register):
     """
     EOR Rd, Rr Exclusive OR Rd ← Rd ⊕ Rr
     """
+    rd = sim.regs[rd]
+    rr = sim.regs[rr]
     rd.value = rd.value ^ rr.value
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
@@ -30,8 +32,13 @@ def anl(sim: Simulator, rd: Register, rr: Register):
     Rd ← Rd • Rr
     Z,N,V,S
     """
+    rd = sim.regs[rd]
+    rr = sim.regs[rr]
     rd.value = rd.value & rr.value
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
+
+
+anl.__name__ = 'and'
 
 
 def add(sim: Simulator, rd: Register, rr: Register):
@@ -41,6 +48,8 @@ def add(sim: Simulator, rd: Register, rr: Register):
     Rd ← Rd + Rr
     Z,C,N,V,S,H
     """
+    rd = sim.regs[rd]
+    rr = sim.regs[rr]
     rd.value = rd.value + rr.value
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
@@ -52,6 +61,8 @@ def ld(sim: Simulator, rd: Register, x: PointerRegister):
     Rd ← (X)
     None
     """
+    rd = sim.regs[rd]
+    x = sim.regs[x]
     rd.value = sim.memory[x.value]
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
@@ -63,6 +74,8 @@ def st(sim: Simulator, x: PointerRegister, rr: Register):
     (X) ← Rr
     None
     """
+    x = sim.regs[x]
+    rr = sim.regs[rr]
     sim.memory[x.value] = rr.value
     sim.leakage += [normalized_noisy_hamming_weight(rr.value, 0.01)]
 
@@ -74,6 +87,7 @@ def ldi(sim: Simulator, rd: Register, k: int):
     Rd ← K
     None
     """
+    rd = sim.regs[rd]
     rd.value = k
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
@@ -84,6 +98,8 @@ def mov(sim: Simulator, rd: Register, rr: Register):
     Copy Register
     Rd ← Rr
     """
+    rd = sim.regs[rd]
+    rr = sim.regs[rr]
     rd.value = rr.value
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
@@ -96,8 +112,10 @@ def movw(sim: Simulator, rd: Register, rr: Register):
     Rd+1:Rd ← Rr+1:Rr
     None
     """
-    rdplus = sim.regs['r%d' % (int(rd.name[1:]) + 1)]
-    rrplus = sim.regs['r%d' % (int(rr.name[1:]) + 1)]
+    rdplus = sim.regs['r%d' % (int(rd[1:]) + 1)]
+    rrplus = sim.regs['r%d' % (int(rr[1:]) + 1)]
+    rd = sim.regs[rd]
+    rr = sim.regs[rr]
     rd.value = rr.value
     rdplus.value = rrplus.value
     sim.leakage += [

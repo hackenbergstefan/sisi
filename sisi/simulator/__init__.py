@@ -105,8 +105,8 @@ class Program(object):
     def __init__(self, instructions: list):
         self.instructions = instructions
         self.labels = {
-            ins: i
-            for i, ins in enumerate(instructions) if isinstance(ins, Label)
+            label.name: i
+            for i, label in enumerate(instructions) if isinstance(label, Label)
         }
 
     def execute(self, sim: Simulator, reset=True):
