@@ -23,6 +23,7 @@ def normalized_noisy_hamming_weight(x, noise_strength):
 class Simulator(object):
 
     def __init__(self):
+        self.program = None
         self.leakage = []
 
     def execute(self, ins):
@@ -31,11 +32,10 @@ class Simulator(object):
         else:
             ins.execute(self)
 
-
-class ListingParser(object):
-
-    def __init__(self, lstinput):
-        self.parse(lstinput)
+    def reset(self):
+        """Resets all registers to zero."""
+        for reg in self.regs.values():
+            reg.value = 0
 
 
 class Register(object):
@@ -60,6 +60,12 @@ class Register1(Register):
     max_val = 1
 
 
+class Register16(Register):
+    """8bit register"""
+    number_of_bits = 16
+    max_val = 0xffff
+
+
 class Register8(Register):
     """8bit register"""
     number_of_bits = 8
@@ -75,3 +81,43 @@ class Instruction(object):
 
     def execute(self, sim):
         self.operation(sim, *self.operands)
+
+
+class Label(object):
+    """Label in a program."""
+
+    def __init__(self, name):
+        self.name = name
+
+
+class ProgramEndException(Exception):
+    """End of program indication."""
+    pass
+
+
+def end(sim: Simulator):
+    """End pseudoinstruction."""
+    raise ProgramEndException('Ended with pc = %d', sim.pc.value)
+
+
+class Program(object):
+
+    def __init__(self, instructions: list):
+        self.instructions = instructions
+        self.labels = {
+            ins: i
+            for i, ins in enumerate(instructions) if isinstance(ins, Label)
+        }
+
+    def execute(self, sim: Simulator, reset=True):
+        if reset:
+            sim.reset()
+        sim.program = self
+        try:
+            while 1:
+                self.instructions[sim.pc.value].execute(sim)
+                sim.pc.value += 1
+        except ProgramEndException:
+            pass
+        except IndexError:
+            pass

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import Register, Simulator, normalized_noisy_hamming_weight
+from . import Register, Simulator, normalized_noisy_hamming_weight, Label
 from .xmega import PointerRegister
 
 
@@ -104,3 +104,13 @@ def movw(sim: Simulator, rd: Register, rr: Register):
         normalized_noisy_hamming_weight(rd.value, 0.1),
         normalized_noisy_hamming_weight(rr.value, 0.1),
     ]
+
+
+def jmp(sim: Simulator, label: Label):
+    """
+    JMP k
+    Jump
+    PC ← k
+    None
+    """
+    sim.pc.value = sim.program.labels[label]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import Simulator, Register8, Register
+from . import Simulator, Register, Register8, Register16
 
 
 class PointerRegister(Register):
@@ -31,4 +31,5 @@ class XMegaSimulator(Simulator):
         self.regs['X'] = PointerRegister('X', self.regs['r26'], self.regs['r27'])
         self.regs['Y'] = PointerRegister('Y', self.regs['r28'], self.regs['r29'])
         self.regs['Z'] = PointerRegister('Z', self.regs['r30'], self.regs['r31'])
+        self.pc = self.regs['pc'] = Register16('pc')
         self.memory = dict()
