@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from . import Register, Simulator, hamming_weight, normalized_noisy_hamming_weight
+from . import Register, Simulator, normalized_noisy_hamming_weight
 from .xmega import PointerRegister
 
 
@@ -77,6 +77,7 @@ def ldi(sim: Simulator, rd: Register, k: int):
     rd.value = k
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.01)]
 
+
 def mov(sim: Simulator, rd: Register, rr: Register):
     """
     MOV Rd, Rr
@@ -86,12 +87,20 @@ def mov(sim: Simulator, rd: Register, rr: Register):
     rd.value = rr.value
     sim.leakage += [normalized_noisy_hamming_weight(rd.value, 0.1)]
 
-def add(sim: Simulator, rd: Register, rr: Register):
+
+def movw(sim: Simulator, rd: Register, rr: Register):
     """
-    ADD Rd, Rr
-    Add without Carry
-    Rd ← Rd + Rr
-    Z,C,N,V,S,H
+    MOVW Rd, Rr
+    Copy Register
+    Pair
+    Rd+1:Rd ← Rr+1:Rr
+    None
     """
-    rd.value += rr.value
-    # sim.leakage += [hamming_weight(rd.value)]
+    rdplus = sim.regs['r%d' % (int(rd.name[1:]) + 1)]
+    rrplus = sim.regs['r%d' % (int(rr.name[1:]) + 1)]
+    rd.value = rr.value
+    rdplus.value = rrplus.value
+    sim.leakage += [
+        normalized_noisy_hamming_weight(rd.value, 0.1),
+        normalized_noisy_hamming_weight(rr.value, 0.1),
+    ]

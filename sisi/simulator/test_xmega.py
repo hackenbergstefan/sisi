@@ -3,9 +3,9 @@
 
 
 import unittest
-from . import Instruction, hamming_weight
+from . import Instruction
 from .xmega import XMegaSimulator
-from .xmega_instruction_set import eor, add, ld, st, ldi
+from .xmega_instruction_set import eor, add, ld, st, ldi, movw
 
 
 class SimpleTestCase(unittest.TestCase):
@@ -19,7 +19,6 @@ class SimpleTestCase(unittest.TestCase):
         r1.value = b
         sim.execute(Instruction(eor, r0, r1))
         self.assertEqual(r0.value, a ^ b)
-        self.assertEqual(sim.leakage, [hamming_weight(a ^ b)])
 
     def test_add(self):
         a, b = 0x1b, 0x38
@@ -36,6 +35,14 @@ class SimpleTestCase(unittest.TestCase):
         r0 = sim.regs['r0']
         sim.execute(Instruction(ldi, r0, 0xAB))
         self.assertEqual(r0.value, 0xAB)
+
+    def test_movew(self):
+        sim = XMegaSimulator()
+        sim.regs['r0'].value = 0x12
+        sim.regs['r1'].value = 0x34
+        sim.execute(Instruction(movw, sim.regs['r2'], sim.regs['r0']))
+        self.assertEqual(sim.regs['r2'].value, 0x12)
+        self.assertEqual(sim.regs['r3'].value, 0x34)
 
     def test_pointer_registers(self):
         sim = XMegaSimulator()

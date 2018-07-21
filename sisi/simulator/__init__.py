@@ -40,8 +40,9 @@ class ListingParser(object):
 
 class Register(object):
 
-    def __init__(self):
+    def __init__(self, name):
         self.value = 0
+        self.name = name
 
     def __setattr__(self, name, value):
         if name == 'value':
